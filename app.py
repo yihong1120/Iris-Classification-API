@@ -34,7 +34,7 @@ def create_key():
 
     return jsonify({"requestId": request_id, "status": "PROCESSING"})
 
-@app.route('/return/<key>', methods=['GET'])
+@app.route('/return', methods=['GET'])
 def inquire_alignment_status(key):
     # Read the inquiry file and check the value of the key
     with open(f'./xy018/json/restore/{key}/inquiry.json', 'r') as f:
@@ -48,7 +48,7 @@ def inquire_alignment_status(key):
         response = json.load(f)
     return jsonify(response)
 
-@app.route('/request/<key>', methods=['GET'])
+@app.route('/request', methods=['GET'])
 def request_orgine_data(key):
     # Read the request file and return its contents
     with open(f'./xy018/json/restore/{key}/request.json', 'r') as f:
