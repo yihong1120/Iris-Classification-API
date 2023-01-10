@@ -28,6 +28,10 @@ To install the necessary dependencies, navigate to the root of the project and r
 
 ## Running the application
 
+Open another terminal, navigate to the root of the project and run the following command:
+
+    python3 computation.py
+
 To run the application, navigate to the root of the project and run the following command:
 
     python app.py
