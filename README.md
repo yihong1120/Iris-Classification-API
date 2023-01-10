@@ -1,4 +1,4 @@
-# Flask Server
+# Iris-Classification-API
 
 This is a simple RESTful API built using the Flask web framework for Python. It provides two main functionalities:
 
