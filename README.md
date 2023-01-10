@@ -1,4 +1,4 @@
-# Iris-Classification-API
+# Flask Server
 
 This is a simple RESTful API built using the Flask web framework for Python. It provides two main functionalities:
 
@@ -24,13 +24,13 @@ You will need to have the following installed on your machine:
 
 To install the necessary dependencies, navigate to the root of the project and run the following command:
 
-* pip install -r requirements.txt
+    pip install -r requirements.txt
 
 ## Running the application
 
 To run the application, navigate to the root of the project and run the following command:
 
-* python app.py
+    python app.py
 
 This will start the server on *http://0.0.0.0:8080/* and the application will be ready to handle incoming requests.
 
