@@ -1,47 +1,65 @@
 # Flask Server
 
-This repository contains a simple Flask server that exposes three endpoints for handling requests and responses.
+This is a simple RESTful API built using the Flask web framework for Python. It provides two main functionalities:
+
+* Creating new requests
+* Inquiring about the status of existing requests
 
 ## Getting Started
 
-To run the server in this repository, you will need a system with Python and Flask installed.
-## Endpoints
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
-* '/key': This endpoint is used to receive JSON data from a client, it generates a random string as a request_id, write the request data and request_id to a file and create a subdirectory in './xy018/json/restore/' with the request_id as the name and write a file with a status of False
-* '/return/<key>': This endpoint is used to return the response of the task based on the request_id passed in the key parameter. it reads the inquiry file and check the value of the key, if the value is False, it returns a processing status if the value is False, if the value is True, it returns the content of the response file
-* '/request/<key>': This endpoint is used to return the request data based on the request_id passed in the key parameter, it reads the request file and returns its contents
+## Prerequisites
 
-## Scripts
-
-* 'server.py': This script is used to create a Flask server and handle the endpoints.
-
-## Usage
-To run the server, navigate to the project directory in your terminal and run the following command:
-
-    python server.py
-    
-This will start the server on the localhost with the port 8080 and enable the debug mode for development purpose.
-
-## Requirements
+You will need to have the following installed on your machine:
 
 * Python 3.x
-* Flask
+* Flask web framework
 * Flask-Cors
+* numpy
+* scikit-learn
+* xgboost
+
+## Installing
+
+To install the necessary dependencies, navigate to the root of the project and run the following command:
+
+* pip install -r requirements.txt
+
+## Running the application
+
+To run the application, navigate to the root of the project and run the following command:
+
+* python app.py
+
+This will start the server on *http://0.0.0.0:8080/* and the application will be ready to handle incoming requests.
+
+## Usage
+
+The API has the following three endpoints:
+
+* */key*: A POST endpoint that allows clients to create new requests. It generates a unique request ID and stores the request data in a file named request.json inside a directory named after the request ID. Additionally, it creates another file named inquiry.json in the same directory to store the status of the request.
+
+* */status/<string:request_id>*: A GET endpoint that allows clients to inquire about the status of a request using the request ID. It opens the inquiry.json file corresponding to the request ID, reads the status, and returns it as a JSON response. If the request has been completed, it also opens the response.json file and returns the response data.
+
+* */request/<string:request_id>*: A GET endpoint that allows clients to retrieve the original request data using the request ID. It opens the request.json file corresponding to the request ID and returns the data as a JSON response.
 
 ## Note
+This application stores all the data on the local filesystem, in the json directory, which could cause issues in a production environment because the data would not be shared between multiple instances of the API. In production, it is a good idea to use a database such as MongoDB, MySQL, or PostgreSQL to store the data, making it more scalable.
 
-* The file and folder structure mentioned in the script is just an example and the server will not be able to locate those unless the folder structure exist on the local system.
-* The server is running in the debug mode for development purpose only, it's recommended to use a production-ready web server such as Apache or Nginx to serve the application in production.
+## Built With
 
-## Acknowledgements
+* [Flask](https://flask.palletsprojects.com/en/2.1.x/) - The web framework used
+* [Flask-Cors](https://flask-cors.readthedocs.io/en/latest/) - To handle cross-origin requests
 
-Thank you to the Python and Flask communities for creating such powerful tools.
+## Acknowledgments
 
-## Additional Notes
+* This project is just a demonstration of basic functionality that can be built using Flask, it is not production-ready.
+* You should consider storing the data in a real database for production-ready.
+* Depending on your use case, you might consider adding authentication and access control mechanisms to the API.
+* You might also want to think about ways to handle errors and exceptions gracefully, for example, by returning appropriate error messages or status codes.
+* Also you may consider adding other endpoints to update or delete the request, or even include an endpoint to handle the requests.
 
-* The script assumes that the dependencies are installed on the system, you may want to provide the instructions for installing the dependencies in the README.md file
-* It also assumes that the endpoint /key is being passed JSON data in the body of the request, it would be useful to mention the format of the data being passed as well as the expected return format.
-* Make sure that the server is being run in a secure environment, as it is currently running in debug mode and serving the data over a non-encrypted connection.
-* Be sure to configure the correct path on the local system in the script when creating the request_id folder, request file and inquiry file
-* You may want to consider adding authentication and authorization to the endpoint to secure the access of the endpoints.
-Overall, the script implements a simple Flask web server that exposes three endpoints for handling requests and responses and generating unique request_id. The script provides a simple example of how to implement a RESTful API using the Flask library and can be easily modified to suit different needs.
+## License
+
+This project is licensed under the MIT License
