@@ -42,11 +42,11 @@ This will start the server on *http://0.0.0.0:8080/* and the application will be
 
 The API has the following three endpoints:
 
-* */key*: A POST endpoint that allows clients to create new requests. It generates a unique request ID and stores the request data in a file named request.json inside a directory named after the request ID. Additionally, it creates another file named inquiry.json in the same directory to store the status of the request.
+* '/key': A POST endpoint that allows clients to create new requests. It generates a unique request ID and stores the request data in a file named request.json inside a directory named after the request ID. Additionally, it creates another file named inquiry.json in the same directory to store the status of the request.
 
-* */status/<string:request_id>*: A GET endpoint that allows clients to inquire about the status of a request using the request ID. It opens the inquiry.json file corresponding to the request ID, reads the status, and returns it as a JSON response. If the request has been completed, it also opens the response.json file and returns the response data.
+* '/status/<string:request_id>': A GET endpoint that allows clients to inquire about the status of a request using the request ID. It opens the inquiry.json file corresponding to the request ID, reads the status, and returns it as a JSON response. If the request has been completed, it also opens the response.json file and returns the response data.
 
-* */request/<string:request_id>*: A GET endpoint that allows clients to retrieve the original request data using the request ID. It opens the request.json file corresponding to the request ID and returns the data as a JSON response.
+* '/request/<string:request_id>': A GET endpoint that allows clients to retrieve the original request data using the request ID. It opens the request.json file corresponding to the request ID and returns the data as a JSON response.
 
 ## Note
 This application stores all the data on the local filesystem, in the json directory, which could cause issues in a production environment because the data would not be shared between multiple instances of the API. In production, it is a good idea to use a database such as MongoDB, MySQL, or PostgreSQL to store the data, making it more scalable.
