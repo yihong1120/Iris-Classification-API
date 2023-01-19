@@ -40,16 +40,36 @@ This will start the server on *http://0.0.0.0:8080/* and the application will be
 
 ## Usage
 
-The API has the following three endpoints:
+To use this package, you first need to import it:
 
-* '/key': A POST endpoint that allows clients to create new requests. It generates a unique request ID and stores the request data in a file named request.json inside a directory named after the request ID. Additionally, it creates another file named inquiry.json in the same directory to store the status of the request.
+    from jsonprocessor import RequestHandler, AlignmentStatus, RequestData
 
-* '/status/<string:request_id>': A GET endpoint that allows clients to inquire about the status of a request using the request ID. It opens the inquiry.json file corresponding to the request ID, reads the status, and returns it as a JSON response. If the request has been completed, it also opens the response.json file and returns the response data.
+###RequestHandler
 
-* '/request/<string:request_id>': A GET endpoint that allows clients to retrieve the original request data using the request ID. It opens the request.json file corresponding to the request ID and returns the data as a JSON response.
+The RequestHandler class can be used to write request data to a file and create a subdirectory.
+
+    request_handler = RequestHandler(request_id, request_data)
+    request_handler.write_request()
+    request_handler.create_subdirectory()
+
+###AlignmentStatus
+
+The AlignmentStatus class can be used to inquire about the status of processed files.
+
+    alignment_status = AlignmentStatus(request_id)
+    status = alignment_status.inquire_status()
+
+###RequestData
+
+The RequestData class can be used to get the request data of a processed file.
+
+    request_data = RequestData(request_id)
+    data = request_data.get_request()
 
 ## Note
-This application stores all the data on the local filesystem, in the json directory, which could cause issues in a production environment because the data would not be shared between multiple instances of the API. In production, it is a good idea to use a database such as MongoDB, MySQL, or PostgreSQL to store the data, making it more scalable.
+
+* The package is currently only able to handle request and response data as file operations, you can integrate the package with your processing service to make it more useful.
+* The package is a simple example and you can modify it to suit your needs.
 
 ## Built With
 
@@ -66,4 +86,4 @@ This application stores all the data on the local filesystem, in the json direct
 
 ## License
 
-This project is licensed under the MIT License
+This project is licensed under the [MIT License](https://opensource.org/licenses/MIT)
