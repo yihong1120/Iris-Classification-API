@@ -44,7 +44,7 @@ To use this package, you first need to import it:
 
     from jsonprocessor import RequestHandler, AlignmentStatus, RequestData
 
-###RequestHandler
+### RequestHandler
 
 The RequestHandler class can be used to write request data to a file and create a subdirectory.
 
@@ -52,14 +52,14 @@ The RequestHandler class can be used to write request data to a file and create 
     request_handler.write_request()
     request_handler.create_subdirectory()
 
-###AlignmentStatus
+### AlignmentStatus
 
 The AlignmentStatus class can be used to inquire about the status of processed files.
 
     alignment_status = AlignmentStatus(request_id)
     status = alignment_status.inquire_status()
 
-###RequestData
+### RequestData
 
 The RequestData class can be used to get the request data of a processed file.
 
