@@ -41,7 +41,7 @@ def inquire_alignment_status(key):
         inquiry = json.load(f)
     if not inquiry[key]:
         # Return a processing status if the value is False
-        return jsonify({"requestId": key, "status": "PROCESSING", "curveList": [], "arrowList": []})
+        return jsonify({"requestId": key, "status": "PROCESSING"})
 
     # Read the response file and return its contents if the value is True
     with open(f'./xy018/json/restore/{key}/response.json', 'r') as f:
