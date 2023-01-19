@@ -10,50 +10,80 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-def generate_random_string() -> str:
-    """Generate a random string of length 10."""
-    return ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+class RequestHandler:
+    def __init__(self, request_id: str, request_data: dict):
+        self.request_id = request_id
+        self.request_data = request_data
+        self.work_path = "./xy018/json/new_work/"
+        self.restore_path = "./xy018/json/restore/"
+
+    def write_request(self):
+        """Write request data to a file"""
+        with open(f'{self.work_path}{self.request_id}.json', 'w') as f:
+            json.dump(self.request_data, f)
+
+    def create_subdirectory(self):
+        """Create a subdirectory and write a file with a status of False"""
+        os.makedirs(f'{self.restore_path}{self.request_id}', exist_ok=True)
+        with open(f'{self.restore_path}{self.request_id}/inquiry.json', 'w') as f:
+            json.dump({self.request_id:False}, f)
+
+class AlignmentStatus:
+    def init(self, request_id: str):
+        self.request_id = request_id
+        self.restore_path = "./xy018/json/restore/"
+            
+    def inquire_status(self):
+        """Read the inquiry file and check the value of the key"""
+        with open(f'{self.restore_path}{self.request_id}/inquiry.json', 'r') as f:
+            inquiry = json.load(f)
+        if not inquiry[self.request_id]:
+            """Return a processing status if the value is False"""
+            return jsonify({"requestId": self.request_id, "status": "PROCESSING"})
+            
+        """Read the response file and return its contents if the value is True"""
+        with open(f'{self.restore_path}{self.request_id}/response.json', 'r') as f:
+            response = json.load(f)
+        return jsonify(response)
+
+class RequestData:
+    def init(self, request_id: str):
+        self.request_id = request_id
+        self.restore_path = "./xy018/json/restore/"
+        
+    def get_request(self):
+        """Read the request file and return its contents"""
+        with open(f'{self.restore_path}{self.request_id}/request.json', 'r') as f:
+            request = json.load(f)
+        return jsonify(request)
 
 @app.route('/key', methods=['POST'])
 def create_key():
     # Generate request_id
     timestamp = str(int(time.time() * 1000000))
-    random_string = generate_random_string()
+    random_string = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
     request_id = f'{timestamp}{random_string}'
     # Receive json data from the user
     request_data = request.get_json()
 
-    # Write request data to a file
-    with open(f'./xy018/json/new_work/{request_id}.json', 'w') as f:
-        json.dump(request_data, f)
-
-    # Create a subdirectory and write a file with a status of False
-    os.makedirs(f'./xy018/json/restore/{request_id}', exist_ok=True)
-    with open(f'./xy018/json/restore/{request_id}/inquiry.json', 'w') as f:
-        json.dump({request_id: False}, f)
+    # Create an instance of the RequestHandler class and call its methods
+    request_handler = RequestHandler(request_id, request_data)
+    request_handler.write_request()
+    request_handler.create_subdirectory()
 
     return jsonify({"requestId": request_id, "status": "PROCESSING"})
-
-@app.route('/return', methods=['GET'])
+    
+@app.route('/return/<key>', methods=['GET'])
 def inquire_alignment_status(key):
-    # Read the inquiry file and check the value of the key
-    with open(f'./xy018/json/restore/{key}/inquiry.json', 'r') as f:
-        inquiry = json.load(f)
-    if not inquiry[key]:
-        # Return a processing status if the value is False
-        return jsonify({"requestId": key, "status": "PROCESSING"})
+    # Create an instance of the AlignmentStatus class and call its method
+    alignment_status = AlignmentStatus(key)
+    return alignment_status.inquire_status()
 
-    # Read the response file and return its contents if the value is True
-    with open(f'./xy018/json/restore/{key}/response.json', 'r') as f:
-        response = json.load(f)
-    return jsonify(response)
-
-@app.route('/request', methods=['GET'])
+@app.route('/request/<key>', methods=['GET'])
 def request_orgine_data(key):
-    # Read the request file and return its contents
-    with open(f'./xy018/json/restore/{key}/request.json', 'r') as f:
-        request = json.load(f)
-    return jsonify(request)
+    # Create an instance of the RequestData class and call its method
+    request_data = RequestData(key)
+    return request_data.get_request()
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=8080, debug=True)
