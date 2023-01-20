@@ -28,7 +28,7 @@ class RequestHandler:
         with open(f'{self.restore_path}{self.request_id}/inquiry.json', 'w') as f:
             json.dump({self.request_id:False}, f)
 
-class AlignmentStatus:
+class PredictStatus:
     def init(self, request_id: str):
         self.request_id = request_id
         self.restore_path = "./xy018/json/restore/"
@@ -74,10 +74,10 @@ def create_key():
     return jsonify({"requestId": request_id, "status": "PROCESSING"})
     
 @app.route('/return/<key>', methods=['GET'])
-def inquire_alignment_status(key):
-    # Create an instance of the AlignmentStatus class and call its method
-    alignment_status = AlignmentStatus(key)
-    return alignment_status.inquire_status()
+def inquire_predict_status(key):
+    # Create an instance of the PredictStatus class and call its method
+    predict_status = PredictStatus(key)
+    return predict_status.inquire_status()
 
 @app.route('/request/<key>', methods=['GET'])
 def request_orgine_data(key):
