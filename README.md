@@ -42,7 +42,7 @@ This will start the server on *http://0.0.0.0:8080/* and the application will be
 
 To use this package, you first need to import it:
 
-    from jsonprocessor import RequestHandler, AlignmentStatus, RequestData
+    from jsonprocessor import RequestHandler, PredictionStatus, RequestData
 
 ### RequestHandler
 
@@ -52,12 +52,12 @@ The RequestHandler class can be used to write request data to a file and create 
     request_handler.write_request()
     request_handler.create_subdirectory()
 
-### AlignmentStatus
+### PredictionStatus
 
-The AlignmentStatus class can be used to inquire about the status of processed files.
+The PredictionStatus class can be used to inquire about the status of processed files.
 
-    alignment_status = AlignmentStatus(request_id)
-    status = alignment_status.inquire_status()
+    prediction_status = PredictionStatus(request_id)
+    status = prediction_status.inquire_status()
 
 ### RequestData
 
