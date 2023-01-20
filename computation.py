@@ -2,91 +2,129 @@ import os
 import time
 import shutil
 import json
-from collections import OrderedDict
-from typing import Any
 import pickle
 
-# Function to extract data from a JSON file
-def get_json_data(json_path:str) -> Any:
-    with open(json_path, "r") as f:
-        return json.load(f, object_pairs_hook=OrderedDict)
+class JSONHandler:
+    @staticmethod
+    def get_data(json_path: str):
+        """
+        Reads data from a json file and returns it as a dictionary
+        :param json_path: path to json file
+        :return: data in json file as a dictionary
+        """
+        try:
+            with open(json_path, "r") as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"Error reading JSON file: {e}")
 
-# Function to write data to a JSON file
-def write_json_file(path: str, data: Any) -> None:
-    with open(path, 'w') as f:
-        json.dump(data, f)
+    @staticmethod
+    def write_data(path: str, data: dict):
+        """
+        Writes data to a json file
+        :param path: path to json file
+        :param data: data to be written in the json file
+        """
+        try:
+            with open(path, 'w') as f:
+                json.dump(data, f)
+        except Exception as e:
+            print(f"Error writing JSON file: {e}")
 
-# Function to remove folders that exist over 30 days
-def delete_old_folders(dir_path: str) -> None:
-    # Get the current time in seconds since the epoch
-    current_time = time.time()
+class FolderHandler:
+    @staticmethod
+    def delete_old(dir_path: str):
+        """
+        Deletes folders that are older than 30 days
+        :param dir_path: path to the directory containing the folders
+        """
+        try:
+            current_time = time.time()
+            for folder in os.listdir(dir_path):
+                folder_path = os.path.join(dir_path, folder)
+                if os.path.isdir(folder_path):
+                    creation_time = os.path.getctime(folder_path)
+                    time_diff = current_time - creation_time
+                    if time_diff > 2592000:
+                        shutil.rmtree(folder_path)
+        except Exception as e:
+            print(f"Error deleting old folders: {e}")
 
-    # Iterate through all the folders in the given directory
-    for folder in os.listdir(dir_path):
-        # Get the full path of the folder
-        folder_path = os.path.join(dir_path, folder)
-        # Check if the path is a directory
-        if os.path.isdir(folder_path):
-            # Get the creation time of the folder in seconds since the epoch
-            creation_time = os.path.getctime(folder_path)
-            # Calculate the difference in time between the current time and the creation time
-            time_diff = current_time - creation_time
-            # If the difference is greater than 30 days (in seconds), delete the folder
-            if time_diff > 2592000:
-                os.rmdir(folder_path)
+class ModelHandler:
+    def __init__(self):
+        """
+        loads a machine learning model from a pickle file
+        """
+        try:
+            with open('./model/iris.pickle', 'rb') as f:
+                self.xgboostModel = pickle.load(f)
+        except Exception as e:
+            print(f"Error loading model: {e}")
 
-# load model
-with open('./model/iris.pickle', 'rb') as f:
-    xgboostModel = pickle.load(f)
+    def predict(self, input_json: str):
+        """
+        makes predictions using the loaded model
+        :param input_json: path to json file with input data
+        :return: prediction result
+        """
+        try:
+            input_data = JSONHandler.get_data(input_json)
+            pred = self.xgboostModel.predict(input_data)[0]
+            return pred
+        except Exception as e:
+            print(f"Error predicting: {e}")
 
-# write the model into function
-def predict(input):
-    input = get_json_data(input)
-    pred=xgboostModel.predict(input)[0]
-    return pred
+class WorkflowHandler:
+    def __init__(self):
+        """
+        initializes the paths to the work and restore folders
+        """
+        self.work_path = "xy018/json/new_work/"
+        self.restore_path = "xy018/json/restore/"
 
-# Set the paths for the directories where the JSON files are stored
-work_path = "xy018/json/new_work/"
-restore_path = "xy018/json/restore/"
-
-# Loop indefinitely
-while True:
-    try:
-        # Delete the data which has been posted over 30 days
-        delete_old_folders(restore_path)
-        # Get a sorted list of all JSON files in the "new_work" directory
-        sorted_json_files = sorted(os.listdir(work_path))
-
-        # If there are any JSON files in the directory
-        if sorted_json_files:
-            # Process each file in the list
+    def run(self):
+        """
+        runs the workflow, which includes:
+        1. Deletes old folders from the restore path
+        2. Sorts the json files in the work path
+        3. For each file in the work path:
+            - Extracts the request ID from the file name
+            - Prints a message indicating the start of prediction for the request
+            - Sleeps for 10 seconds
+            - Makes a prediction using the loaded model and input data from the json file
+            - If the prediction is successful, prints the prediction result
+            - If the prediction fails, prints an error message and skips the file
+            - Creates a new folder in the restore path with the request ID as the name
+            - Moves the json file to the new folder and renames it as "request.json"
+            - Writes the prediction result and request ID to a json file in the new folder and names it "response.json"
+            - Writes a json file in the new folder named "inquiry.json" with the request ID and a value of true
+            - Prints a message indicating the end of prediction for the request and the time consumed
+        4. Repeats the process in an infinite while loop
+        """
+        while True:
+            FolderHandler.delete_old(self.restore_path)
+            sorted_json_files = sorted(os.listdir(self.work_path))
             for file in sorted_json_files:
-                # Extract the request ID from the filename
                 request_id = file.split(".")[0]
-                print(f"Commencing alignment, request ID: {request_id}")
+                print(f"Commencing prediction, request ID: {request_id}")
                 time_start = time.time()
-
-                # Wait 10 seconds to ensure the file has finished writing
                 time.sleep(10)
-
-                # Run the iris prediction function on the file
-                predict(os.path.join(restore_path, file))
-
-                # Move the processed file from the "new_work" directory to the "restore" directory
-                shutil.move(os.path.join(work_path, file), os.path.join(restore_path, request_id, "request.json"))
-
-                # Add the request ID to the aligned JSON file
-                alignment_json_path = os.path.join(restore_path, request_id, "response.json")
-                alignment_json = get_json_data(alignment_json_path)
-                alignment_json["requestId"] = request_id
-                write_json_file(alignment_json_path, alignment_json)
-
-                # Edit the status to the inquiry JSON file
-                inquiry_path = os.path.join(restore_path, request_id, "inquiry.json")
-                write_json_file(inquiry_path, {request_id: True})
-
+                prediction_result = ModelHandler().predict(os.path.join(self.work_path, file))
+                if prediction_result:
+                    print(f"Prediction result: {prediction_result}")
+                else:
+                    print("Error making prediction, skipping file...")
+                    continue
+                os.makedirs(os.path.join(self.restore_path, request_id), exist_ok=True)
+                shutil.move(os.path.join(self.work_path, file), os.path.join(self.restore_path, request_id, "request.json"))
+                response_json_path = os.path.join(self.restore_path, request_id, "response.json")
+                JSONHandler.write_data(response_json_path, {"requestId": request_id, "prediction_result": prediction_result})
+                inquiry_path = os.path.join(self.restore_path, request_id, "inquiry.json")
+                JSONHandler.write_data(inquiry_path, {request_id: True})
                 time_end = time.time()
-                print(f"Finished alignment, request ID: {request_id}")
+                print(f"Finished prediction, request ID: {request_id}")
                 print(f"Time consuming: {time_end - time_start} seconds")
-    except Exception as e:  # Catch any errors that might occur and print the error message
-        print(f"Error: {e}")
+
+if __name__ == "__main__":
+    handler = WorkflowHandler()
+    handler.run()
